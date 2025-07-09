@@ -1,67 +1,187 @@
-# Payload Blank Template
+# Payload CMS E-commerce System
 
-This template comes configured with the bare minimum to get started on anything you need.
+A comprehensive e-commerce system built with Payload CMS, featuring complete product management, order processing, inventory tracking, and customer management capabilities.
 
-## Quick start
+## Features
 
-This template can be deployed directly from our Cloud hosting and it will setup MongoDB and cloud S3 object storage for media.
+### Core E-commerce Collections
 
-## Quick Start - local setup
+- **Products**: Complete product management with variants, images, pricing, and SEO
+- **Categories**: Hierarchical category system with nested support
+- **Brands**: Brand management with logos and descriptions
+- **Orders**: Full order lifecycle management with status tracking
+- **Cart**: Shopping cart functionality with session support
+- **Inventory**: Stock tracking, variants, and availability management
+- **Users/Customers**: Enhanced user profiles with addresses and preferences
+- **Addresses**: Shipping and billing address management
+- **Payment Methods**: Multiple payment gateway support
+- **Shipping Options**: Flexible shipping methods and pricing
+- **Reviews**: Product review system with moderation
+- **Coupons**: Promotional codes and discount management
 
-To spin up this template locally, follow these steps:
+### Key Features
 
-### Clone
+- TypeScript support with auto-generated types
+- Comprehensive field validation and relationships
+- Admin UI with proper column configurations
+- SEO-friendly with meta fields
+- Multi-currency support
+- Inventory tracking with low stock alerts
+- Product variants (size, color, etc.)
+- Review system with ratings and moderation
+- Flexible coupon system with various discount types
 
-After you click the `Deploy` button above, you'll want to have standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
+## Quick Start
 
-### Development
+### Prerequisites
 
-1. First [clone the repo](#clone) if you have not done so already
-2. `cd my-project && cp .env.example .env` to copy the example environment variables. You'll need to add the `MONGODB_URI` from your Cloud project to your `.env` if you want to use S3 storage and the MongoDB database that was created for you.
+- Node.js 18+
+- MongoDB database
+- Git
 
-3. `pnpm install && pnpm dev` to install dependencies and start the dev server
-4. open `http://localhost:3000` to open the app in your browser
+### Installation
 
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
+1. Clone the repository:
 
-#### Docker (Optional)
+```bash
+git clone https://github.com/Duy257/payload-cms.git
+cd payload-cms
+```
 
-If you prefer to use Docker for local development instead of a local MongoDB instance, the provided docker-compose.yml file can be used.
+2. Install dependencies:
 
-To do so, follow these steps:
+```bash
+npm install
+# or
+pnpm install
+```
 
-- Modify the `MONGODB_URI` in your `.env` file to `mongodb://127.0.0.1/<dbname>`
-- Modify the `docker-compose.yml` file's `MONGODB_URI` to match the above `<dbname>`
-- Run `docker-compose up` to start the database, optionally pass `-d` to run in the background.
+3. Set up environment variables:
 
-## How it works
+```bash
+cp .env.example .env
+```
 
-The Payload config is tailored specifically to the needs of most websites. It is pre-configured in the following ways:
+Add your MongoDB URI and other required environment variables to `.env`:
 
-### Collections
+```
+DATABASE_URI=mongodb://localhost:27017/payload-ecommerce
+PAYLOAD_SECRET=your-secret-key
+```
 
-See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
+4. Generate TypeScript types:
 
-- #### Users (Authentication)
+```bash
+npm run generate:types
+```
 
-  Users are auth-enabled collections that have access to the admin panel.
+5. Start the development server:
 
-  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
+```bash
+npm run dev
+```
 
-- #### Media
+6. Open your browser and navigate to `http://localhost:3000/admin` to access the admin panel.
 
-  This is the uploads enabled collection. It features pre-configured sizes, focal point and manual resizing to help you manage your pictures.
+### Docker Setup (Optional)
 
-### Docker
+If you prefer to use Docker for local development:
 
-Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
+1. Modify the `DATABASE_URI` in your `.env` file to `mongodb://mongo:27017/payload-ecommerce`
+2. Run `docker-compose up` to start the database and application
 
-1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
-1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
+## Collections Overview
 
-That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
+### Products Collection
 
-## Questions
+- Complete product information with rich text descriptions
+- Multiple product images with alt text
+- Pricing with sale and compare-at prices
+- Product variants and specifications
+- SEO fields for search optimization
+- Brand and category relationships
 
-If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
+### Orders Collection
+
+- Order lifecycle management (pending → processing → shipped → delivered)
+- Order items with product snapshots
+- Shipping and billing address integration
+- Payment method tracking
+- Coupon application support
+- Order notes and tracking numbers
+
+### Inventory Collection
+
+- Real-time stock tracking
+- Product variants with individual stock levels
+- Low stock threshold alerts
+- Supplier information and lead times
+- Warehouse location tracking
+
+### Reviews Collection
+
+- 5-star rating system
+- Review moderation workflow
+- Verified purchase indicators
+- Helpful vote tracking
+- Store response capability
+
+## API Usage
+
+All collections are accessible via REST API:
+
+```bash
+# Get all products
+GET /api/products
+
+# Get specific product
+GET /api/products/{id}
+
+# Create new order
+POST /api/orders
+
+# Get user's cart
+GET /api/cart?where[customer][equals]={userId}
+```
+
+## Development
+
+### Adding New Fields
+
+1. Modify the collection configuration in `src/collections/`
+2. Run `npm run generate:types` to update TypeScript types
+3. Restart the development server
+
+### Custom Validation
+
+Collections include comprehensive validation rules. Extend them by adding custom validation functions to field configurations.
+
+## Deployment
+
+1. Build the application:
+
+```bash
+npm run build
+```
+
+2. Start the production server:
+
+```bash
+npm start
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## Support
+
+For questions and support:
+
+- [Payload CMS Documentation](https://payloadcms.com/docs)
+- [GitHub Issues](https://github.com/Duy257/payload-cms/issues)
+- [Payload Discord](https://discord.com/invite/payload)
