@@ -69,6 +69,17 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    categories: Category;
+    products: Product;
+    brands: Brand;
+    orders: Order;
+    addresses: Address;
+    cart: Cart;
+    inventory: Inventory;
+    'payment-methods': PaymentMethod;
+    'shipping-options': ShippingOption;
+    reviews: Review;
+    coupons: Coupon;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -77,6 +88,17 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    products: ProductsSelect<false> | ProductsSelect<true>;
+    brands: BrandsSelect<false> | BrandsSelect<true>;
+    orders: OrdersSelect<false> | OrdersSelect<true>;
+    addresses: AddressesSelect<false> | AddressesSelect<true>;
+    cart: CartSelect<false> | CartSelect<true>;
+    inventory: InventorySelect<false> | InventorySelect<true>;
+    'payment-methods': PaymentMethodsSelect<false> | PaymentMethodsSelect<true>;
+    'shipping-options': ShippingOptionsSelect<false> | ShippingOptionsSelect<true>;
+    reviews: ReviewsSelect<false> | ReviewsSelect<true>;
+    coupons: CouponsSelect<false> | CouponsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -119,6 +141,32 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: string;
+  firstName: string;
+  lastName: string;
+  /**
+   * Phone number for order notifications
+   */
+  phone?: string | null;
+  /**
+   * Date of birth for age verification and marketing
+   */
+  dateOfBirth?: string | null;
+  role: 'customer' | 'admin' | 'manager';
+  /**
+   * Whether the user account is active
+   */
+  isActive?: boolean | null;
+  preferences?: {
+    /**
+     * Subscribe to newsletter
+     */
+    newsletter?: boolean | null;
+    /**
+     * Receive SMS notifications
+     */
+    smsNotifications?: boolean | null;
+    currency?: ('USD' | 'EUR' | 'GBP') | null;
+  };
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -158,6 +206,916 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: string;
+  name: string;
+  /**
+   * URL-friendly version of the category name
+   */
+  slug: string;
+  /**
+   * Category description for SEO and display
+   */
+  description?: string | null;
+  /**
+   * Category image or icon
+   */
+  image?: (string | null) | Media;
+  /**
+   * Parent category (leave empty for top-level categories)
+   */
+  parent?: (string | null) | Category;
+  status: 'active' | 'inactive';
+  /**
+   * Order for displaying categories (lower numbers first)
+   */
+  sortOrder?: number | null;
+  /**
+   * Mark as featured category
+   */
+  isHot?: boolean | null;
+  seo?: {
+    /**
+     * SEO title for category page
+     */
+    title?: string | null;
+    /**
+     * SEO meta description
+     */
+    description?: string | null;
+    /**
+     * SEO keywords (comma-separated)
+     */
+    keywords?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products".
+ */
+export interface Product {
+  id: string;
+  name: string;
+  /**
+   * URL-friendly version of the product name
+   */
+  slug: string;
+  /**
+   * Stock Keeping Unit - unique product identifier
+   */
+  sku: string;
+  /**
+   * Full product description with rich formatting
+   */
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Brief product summary for listings
+   */
+  shortDescription?: string | null;
+  images: {
+    image: string | Media;
+    alt: string;
+    /**
+     * Mark as main product image
+     */
+    isMain?: boolean | null;
+    id?: string | null;
+  }[];
+  /**
+   * Regular price in cents (e.g., 1999 for $19.99)
+   */
+  price: number;
+  /**
+   * Sale price in cents (leave empty if not on sale)
+   */
+  salePrice?: number | null;
+  /**
+   * Original price for comparison (MSRP)
+   */
+  compareAtPrice?: number | null;
+  categories: (string | Category)[];
+  brand: string | Brand;
+  status: 'draft' | 'published' | 'archived';
+  /**
+   * Mark as featured product
+   */
+  isFeatured?: boolean | null;
+  /**
+   * Product weight in grams for shipping calculations
+   */
+  weight?: number | null;
+  dimensions?: {
+    /**
+     * Length in centimeters
+     */
+    length?: number | null;
+    /**
+     * Width in centimeters
+     */
+    width?: number | null;
+    /**
+     * Height in centimeters
+     */
+    height?: number | null;
+  };
+  specifications?:
+    | {
+        name: string;
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  tags?:
+    | {
+        tag: string;
+        id?: string | null;
+      }[]
+    | null;
+  seo?: {
+    /**
+     * SEO title for product page
+     */
+    title?: string | null;
+    /**
+     * SEO meta description
+     */
+    description?: string | null;
+    /**
+     * SEO keywords (comma-separated)
+     */
+    keywords?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "brands".
+ */
+export interface Brand {
+  id: string;
+  name: string;
+  /**
+   * URL-friendly version of the brand name
+   */
+  slug: string;
+  /**
+   * Brief description of the brand
+   */
+  description?: string | null;
+  logo: string | Media;
+  /**
+   * Banner image for brand pages
+   */
+  banner?: (string | null) | Media;
+  status: 'active' | 'inactive';
+  /**
+   * Mark as featured/hot brand
+   */
+  isHot?: boolean | null;
+  /**
+   * Order for displaying brands (lower numbers first)
+   */
+  sortOrder?: number | null;
+  seo?: {
+    /**
+     * SEO title for brand page
+     */
+    title?: string | null;
+    /**
+     * SEO meta description
+     */
+    description?: string | null;
+    /**
+     * SEO keywords (comma-separated)
+     */
+    keywords?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders".
+ */
+export interface Order {
+  id: string;
+  /**
+   * Unique order identifier
+   */
+  orderNumber: string;
+  customer: string | User;
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded';
+  orderItems: {
+    product: string | Product;
+    quantity: number;
+    /**
+     * Price per unit at time of order (in cents)
+     */
+    unitPrice: number;
+    /**
+     * Total price for this line item (in cents)
+     */
+    totalPrice: number;
+    /**
+     * Product details at time of order
+     */
+    productSnapshot?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    id?: string | null;
+  }[];
+  /**
+   * Subtotal before tax and shipping (in cents)
+   */
+  subtotal: number;
+  /**
+   * Tax amount (in cents)
+   */
+  tax: number;
+  /**
+   * Shipping cost (in cents)
+   */
+  shipping: number;
+  /**
+   * Total discount amount (in cents)
+   */
+  discount?: number | null;
+  /**
+   * Final total amount (in cents)
+   */
+  total: number;
+  currency: 'USD' | 'EUR' | 'GBP';
+  shippingAddress: string | Address;
+  billingAddress: string | Address;
+  paymentMethod?: (string | null) | PaymentMethod;
+  shippingMethod?: (string | null) | ShippingOption;
+  appliedCoupons?: (string | Coupon)[] | null;
+  orderDate: string;
+  /**
+   * Date when order was shipped
+   */
+  shippedDate?: string | null;
+  /**
+   * Date when order was delivered
+   */
+  deliveredDate?: string | null;
+  /**
+   * Shipping tracking number
+   */
+  trackingNumber?: string | null;
+  /**
+   * Internal notes about the order
+   */
+  notes?: string | null;
+  /**
+   * Customer notes or special instructions
+   */
+  customerNotes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "addresses".
+ */
+export interface Address {
+  id: string;
+  customer: string | User;
+  type: 'shipping' | 'billing' | 'both';
+  /**
+   * Address label (e.g., "Home", "Work", "Office")
+   */
+  label: string;
+  firstName: string;
+  lastName: string;
+  /**
+   * Company name (optional)
+   */
+  company?: string | null;
+  /**
+   * Street address, P.O. box, company name, c/o
+   */
+  addressLine1: string;
+  /**
+   * Apartment, suite, unit, building, floor, etc.
+   */
+  addressLine2?: string | null;
+  city: string;
+  /**
+   * State, province, or region
+   */
+  state: string;
+  /**
+   * ZIP or postal code
+   */
+  postalCode: string;
+  country: 'US' | 'CA' | 'GB' | 'DE' | 'FR' | 'AU';
+  /**
+   * Phone number for delivery
+   */
+  phone?: string | null;
+  /**
+   * Set as default address for this customer
+   */
+  isDefault?: boolean | null;
+  /**
+   * Special delivery instructions
+   */
+  deliveryInstructions?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payment-methods".
+ */
+export interface PaymentMethod {
+  id: string;
+  /**
+   * Payment method name (e.g., "Credit Card", "PayPal")
+   */
+  name: string;
+  type: 'credit_card' | 'debit_card' | 'paypal' | 'apple_pay' | 'google_pay' | 'bank_transfer' | 'cod' | 'crypto';
+  /**
+   * Description shown to customers
+   */
+  description?: string | null;
+  /**
+   * Whether this payment method is available
+   */
+  isActive?: boolean | null;
+  /**
+   * Processing fee in cents
+   */
+  processingFee?: number | null;
+  /**
+   * Processing fee as percentage of order total
+   */
+  processingFeePercentage?: number | null;
+  /**
+   * Minimum order amount for this payment method (in cents)
+   */
+  minimumAmount?: number | null;
+  /**
+   * Maximum order amount for this payment method (in cents)
+   */
+  maximumAmount?: number | null;
+  supportedCountries?:
+    | {
+        country: 'US' | 'CA' | 'GB' | 'DE' | 'FR' | 'AU';
+        id?: string | null;
+      }[]
+    | null;
+  supportedCurrencies?:
+    | {
+        currency: 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD';
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Payment gateway configuration (API keys, etc.)
+   */
+  configuration?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Payment method icon
+   */
+  icon?: (string | null) | Media;
+  /**
+   * Display order (lower numbers first)
+   */
+  sortOrder?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "shipping-options".
+ */
+export interface ShippingOption {
+  id: string;
+  /**
+   * Shipping option name (e.g., "Standard Shipping", "Express")
+   */
+  name: string;
+  /**
+   * Description shown to customers
+   */
+  description?: string | null;
+  carrier: 'ups' | 'fedex' | 'usps' | 'dhl' | 'local' | 'pickup' | 'other';
+  /**
+   * Shipping cost in cents
+   */
+  cost: number;
+  /**
+   * Order amount for free shipping (in cents)
+   */
+  freeShippingThreshold?: number | null;
+  estimatedDays: {
+    /**
+     * Minimum delivery days
+     */
+    min: number;
+    /**
+     * Maximum delivery days
+     */
+    max: number;
+  };
+  /**
+   * Whether this shipping option is available
+   */
+  isActive?: boolean | null;
+  supportedCountries?:
+    | {
+        country: 'US' | 'CA' | 'GB' | 'DE' | 'FR' | 'AU';
+        id?: string | null;
+      }[]
+    | null;
+  weightLimits?: {
+    /**
+     * Minimum weight in grams
+     */
+    min?: number | null;
+    /**
+     * Maximum weight in grams
+     */
+    max?: number | null;
+  };
+  dimensionLimits?: {
+    /**
+     * Maximum length in centimeters
+     */
+    maxLength?: number | null;
+    /**
+     * Maximum width in centimeters
+     */
+    maxWidth?: number | null;
+    /**
+     * Maximum height in centimeters
+     */
+    maxHeight?: number | null;
+  };
+  /**
+   * Whether tracking is available for this option
+   */
+  trackingEnabled?: boolean | null;
+  /**
+   * Whether delivery requires signature
+   */
+  requiresSignature?: boolean | null;
+  /**
+   * Whether insurance is included
+   */
+  insuranceIncluded?: boolean | null;
+  /**
+   * Display order (lower numbers first)
+   */
+  sortOrder?: number | null;
+  /**
+   * Shipping carrier icon
+   */
+  icon?: (string | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "coupons".
+ */
+export interface Coupon {
+  id: string;
+  /**
+   * Coupon code (e.g., "SAVE20", "WELCOME10")
+   */
+  code: string;
+  /**
+   * Internal name for the coupon
+   */
+  name: string;
+  /**
+   * Description shown to customers
+   */
+  description?: string | null;
+  type: 'percentage' | 'fixed_amount' | 'free_shipping' | 'bxgy';
+  /**
+   * Discount value (percentage or amount in cents)
+   */
+  value: number;
+  /**
+   * Minimum order amount to use coupon (in cents)
+   */
+  minimumOrderAmount?: number | null;
+  /**
+   * Maximum discount amount for percentage coupons (in cents)
+   */
+  maximumDiscountAmount?: number | null;
+  /**
+   * Whether the coupon is active
+   */
+  isActive?: boolean | null;
+  /**
+   * When the coupon becomes valid
+   */
+  validFrom: string;
+  /**
+   * When the coupon expires (leave empty for no expiration)
+   */
+  validUntil?: string | null;
+  usageLimit?: {
+    /**
+     * Total number of times coupon can be used
+     */
+    total?: number | null;
+    /**
+     * Number of times per customer
+     */
+    perCustomer?: number | null;
+  };
+  /**
+   * Number of times coupon has been used
+   */
+  usageCount?: number | null;
+  /**
+   * Products this coupon applies to (leave empty for all products)
+   */
+  applicableProducts?: (string | Product)[] | null;
+  /**
+   * Categories this coupon applies to
+   */
+  applicableCategories?: (string | Category)[] | null;
+  /**
+   * Products excluded from this coupon
+   */
+  excludedProducts?: (string | Product)[] | null;
+  /**
+   * Categories excluded from this coupon
+   */
+  excludedCategories?: (string | Category)[] | null;
+  customerRestrictions?: {
+    /**
+     * Only for first-time customers
+     */
+    firstTimeCustomersOnly?: boolean | null;
+    /**
+     * Specific customers who can use this coupon
+     */
+    specificCustomers?: (string | User)[] | null;
+    customerGroups?:
+      | {
+          group?: ('vip' | 'wholesale' | 'members') | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  bxgySettings?: {
+    /**
+     * Quantity to buy
+     */
+    buyQuantity?: number | null;
+    /**
+     * Quantity to get free/discounted
+     */
+    getQuantity?: number | null;
+    /**
+     * Products that can be received (leave empty for same products)
+     */
+    getProducts?: (string | Product)[] | null;
+  };
+  /**
+   * Can be combined with other coupons
+   */
+  stackable?: boolean | null;
+  /**
+   * Automatically apply when conditions are met
+   */
+  autoApply?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cart".
+ */
+export interface Cart {
+  id: string;
+  /**
+   * Customer (null for guest carts)
+   */
+  customer?: (string | null) | User;
+  /**
+   * Session ID for guest carts
+   */
+  sessionId?: string | null;
+  cartItems?:
+    | {
+        product: string | Product;
+        quantity: number;
+        /**
+         * Current price per unit (in cents)
+         */
+        unitPrice: number;
+        /**
+         * Total price for this line item (in cents)
+         */
+        totalPrice: number;
+        addedAt: string;
+        /**
+         * Selected product variant details (size, color, etc.)
+         */
+        productVariant?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Cart subtotal (in cents)
+   */
+  subtotal?: number | null;
+  /**
+   * Total number of items in cart
+   */
+  itemCount?: number | null;
+  appliedCoupons?: (string | Coupon)[] | null;
+  /**
+   * Total discount amount applied (in cents)
+   */
+  discountAmount?: number | null;
+  /**
+   * Cart total after discounts (in cents)
+   */
+  total?: number | null;
+  currency: 'USD' | 'EUR' | 'GBP';
+  /**
+   * When this cart expires (for cleanup)
+   */
+  expiresAt?: string | null;
+  /**
+   * Mark as abandoned cart for recovery campaigns
+   */
+  isAbandoned?: boolean | null;
+  /**
+   * Customer notes or special requests
+   */
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inventory".
+ */
+export interface Inventory {
+  id: string;
+  product: string | Product;
+  /**
+   * Stock Keeping Unit for this inventory item
+   */
+  sku: string;
+  /**
+   * Current available stock quantity
+   */
+  stockQuantity: number;
+  /**
+   * Quantity reserved for pending orders
+   */
+  reservedQuantity?: number | null;
+  /**
+   * Available quantity (stock - reserved)
+   */
+  availableQuantity?: number | null;
+  /**
+   * Alert when stock falls below this level
+   */
+  lowStockThreshold?: number | null;
+  /**
+   * Whether to track inventory for this item
+   */
+  trackInventory?: boolean | null;
+  /**
+   * Allow orders when out of stock
+   */
+  allowBackorders?: boolean | null;
+  status: 'in_stock' | 'low_stock' | 'out_of_stock' | 'discontinued' | 'pre_order';
+  /**
+   * Product variants (size, color, etc.)
+   */
+  variants?:
+    | {
+        /**
+         * Variant name (e.g., "Size", "Color")
+         */
+        name: string;
+        /**
+         * Variant value (e.g., "Large", "Red")
+         */
+        value: string;
+        /**
+         * SKU for this specific variant
+         */
+        sku: string;
+        stockQuantity: number;
+        /**
+         * Price adjustment for this variant (in cents)
+         */
+        priceAdjustment?: number | null;
+        /**
+         * Variant-specific image
+         */
+        image?: (string | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  location?: {
+    /**
+     * Warehouse location
+     */
+    warehouse?: string | null;
+    /**
+     * Aisle location
+     */
+    aisle?: string | null;
+    /**
+     * Shelf location
+     */
+    shelf?: string | null;
+    /**
+     * Bin location
+     */
+    bin?: string | null;
+  };
+  supplier?: {
+    /**
+     * Supplier name
+     */
+    name?: string | null;
+    /**
+     * Supplier SKU
+     */
+    supplierSku?: string | null;
+    /**
+     * Lead time in days
+     */
+    leadTime?: number | null;
+    /**
+     * Minimum order quantity from supplier
+     */
+    minimumOrderQuantity?: number | null;
+  };
+  /**
+   * Date when inventory was last restocked
+   */
+  lastRestocked?: string | null;
+  /**
+   * Expected next restock date
+   */
+  nextRestockDate?: string | null;
+  /**
+   * Internal notes about this inventory item
+   */
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reviews".
+ */
+export interface Review {
+  id: string;
+  product: string | Product;
+  customer: string | User;
+  /**
+   * Order this review is associated with (for verified purchases)
+   */
+  order?: (string | null) | Order;
+  /**
+   * Review title/headline
+   */
+  title: string;
+  /**
+   * Review content
+   */
+  comment: string;
+  /**
+   * Rating from 1 to 5 stars
+   */
+  rating: number;
+  status: 'pending' | 'approved' | 'rejected' | 'spam';
+  /**
+   * Whether this is from a verified purchase
+   */
+  isVerifiedPurchase?: boolean | null;
+  /**
+   * Number of helpful votes
+   */
+  helpfulVotes?: number | null;
+  /**
+   * Total number of votes
+   */
+  totalVotes?: number | null;
+  images?:
+    | {
+        image: string | Media;
+        /**
+         * Image caption
+         */
+        caption?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  pros?:
+    | {
+        pro: string;
+        id?: string | null;
+      }[]
+    | null;
+  cons?:
+    | {
+        con: string;
+        id?: string | null;
+      }[]
+    | null;
+  wouldRecommend?: ('yes' | 'no' | 'maybe') | null;
+  customerInfo?: {
+    /**
+     * Name to display publicly (defaults to customer name)
+     */
+    displayName?: string | null;
+    /**
+     * Customer location (city, state)
+     */
+    location?: string | null;
+    /**
+     * Display as anonymous review
+     */
+    isAnonymous?: boolean | null;
+  };
+  /**
+   * Internal moderation notes
+   */
+  moderationNotes?: string | null;
+  response?: {
+    /**
+     * Store response to review
+     */
+    content?: string | null;
+    /**
+     * Staff member who responded
+     */
+    respondedBy?: (string | null) | User;
+    /**
+     * Date of response
+     */
+    respondedAt?: string | null;
+  };
+  /**
+   * Number of times this review was reported
+   */
+  reportedCount?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -170,6 +1128,50 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: string | Category;
+      } | null)
+    | ({
+        relationTo: 'products';
+        value: string | Product;
+      } | null)
+    | ({
+        relationTo: 'brands';
+        value: string | Brand;
+      } | null)
+    | ({
+        relationTo: 'orders';
+        value: string | Order;
+      } | null)
+    | ({
+        relationTo: 'addresses';
+        value: string | Address;
+      } | null)
+    | ({
+        relationTo: 'cart';
+        value: string | Cart;
+      } | null)
+    | ({
+        relationTo: 'inventory';
+        value: string | Inventory;
+      } | null)
+    | ({
+        relationTo: 'payment-methods';
+        value: string | PaymentMethod;
+      } | null)
+    | ({
+        relationTo: 'shipping-options';
+        value: string | ShippingOption;
+      } | null)
+    | ({
+        relationTo: 'reviews';
+        value: string | Review;
+      } | null)
+    | ({
+        relationTo: 'coupons';
+        value: string | Coupon;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -218,6 +1220,19 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  firstName?: T;
+  lastName?: T;
+  phone?: T;
+  dateOfBirth?: T;
+  role?: T;
+  isActive?: T;
+  preferences?:
+    | T
+    | {
+        newsletter?: T;
+        smsNotifications?: T;
+        currency?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -252,6 +1267,425 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  description?: T;
+  image?: T;
+  parent?: T;
+  status?: T;
+  sortOrder?: T;
+  isHot?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        keywords?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products_select".
+ */
+export interface ProductsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  sku?: T;
+  description?: T;
+  shortDescription?: T;
+  images?:
+    | T
+    | {
+        image?: T;
+        alt?: T;
+        isMain?: T;
+        id?: T;
+      };
+  price?: T;
+  salePrice?: T;
+  compareAtPrice?: T;
+  categories?: T;
+  brand?: T;
+  status?: T;
+  isFeatured?: T;
+  weight?: T;
+  dimensions?:
+    | T
+    | {
+        length?: T;
+        width?: T;
+        height?: T;
+      };
+  specifications?:
+    | T
+    | {
+        name?: T;
+        value?: T;
+        id?: T;
+      };
+  tags?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        keywords?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "brands_select".
+ */
+export interface BrandsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  description?: T;
+  logo?: T;
+  banner?: T;
+  status?: T;
+  isHot?: T;
+  sortOrder?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        keywords?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders_select".
+ */
+export interface OrdersSelect<T extends boolean = true> {
+  orderNumber?: T;
+  customer?: T;
+  status?: T;
+  orderItems?:
+    | T
+    | {
+        product?: T;
+        quantity?: T;
+        unitPrice?: T;
+        totalPrice?: T;
+        productSnapshot?: T;
+        id?: T;
+      };
+  subtotal?: T;
+  tax?: T;
+  shipping?: T;
+  discount?: T;
+  total?: T;
+  currency?: T;
+  shippingAddress?: T;
+  billingAddress?: T;
+  paymentMethod?: T;
+  shippingMethod?: T;
+  appliedCoupons?: T;
+  orderDate?: T;
+  shippedDate?: T;
+  deliveredDate?: T;
+  trackingNumber?: T;
+  notes?: T;
+  customerNotes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "addresses_select".
+ */
+export interface AddressesSelect<T extends boolean = true> {
+  customer?: T;
+  type?: T;
+  label?: T;
+  firstName?: T;
+  lastName?: T;
+  company?: T;
+  addressLine1?: T;
+  addressLine2?: T;
+  city?: T;
+  state?: T;
+  postalCode?: T;
+  country?: T;
+  phone?: T;
+  isDefault?: T;
+  deliveryInstructions?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cart_select".
+ */
+export interface CartSelect<T extends boolean = true> {
+  customer?: T;
+  sessionId?: T;
+  cartItems?:
+    | T
+    | {
+        product?: T;
+        quantity?: T;
+        unitPrice?: T;
+        totalPrice?: T;
+        addedAt?: T;
+        productVariant?: T;
+        id?: T;
+      };
+  subtotal?: T;
+  itemCount?: T;
+  appliedCoupons?: T;
+  discountAmount?: T;
+  total?: T;
+  currency?: T;
+  expiresAt?: T;
+  isAbandoned?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inventory_select".
+ */
+export interface InventorySelect<T extends boolean = true> {
+  product?: T;
+  sku?: T;
+  stockQuantity?: T;
+  reservedQuantity?: T;
+  availableQuantity?: T;
+  lowStockThreshold?: T;
+  trackInventory?: T;
+  allowBackorders?: T;
+  status?: T;
+  variants?:
+    | T
+    | {
+        name?: T;
+        value?: T;
+        sku?: T;
+        stockQuantity?: T;
+        priceAdjustment?: T;
+        image?: T;
+        id?: T;
+      };
+  location?:
+    | T
+    | {
+        warehouse?: T;
+        aisle?: T;
+        shelf?: T;
+        bin?: T;
+      };
+  supplier?:
+    | T
+    | {
+        name?: T;
+        supplierSku?: T;
+        leadTime?: T;
+        minimumOrderQuantity?: T;
+      };
+  lastRestocked?: T;
+  nextRestockDate?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payment-methods_select".
+ */
+export interface PaymentMethodsSelect<T extends boolean = true> {
+  name?: T;
+  type?: T;
+  description?: T;
+  isActive?: T;
+  processingFee?: T;
+  processingFeePercentage?: T;
+  minimumAmount?: T;
+  maximumAmount?: T;
+  supportedCountries?:
+    | T
+    | {
+        country?: T;
+        id?: T;
+      };
+  supportedCurrencies?:
+    | T
+    | {
+        currency?: T;
+        id?: T;
+      };
+  configuration?: T;
+  icon?: T;
+  sortOrder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "shipping-options_select".
+ */
+export interface ShippingOptionsSelect<T extends boolean = true> {
+  name?: T;
+  description?: T;
+  carrier?: T;
+  cost?: T;
+  freeShippingThreshold?: T;
+  estimatedDays?:
+    | T
+    | {
+        min?: T;
+        max?: T;
+      };
+  isActive?: T;
+  supportedCountries?:
+    | T
+    | {
+        country?: T;
+        id?: T;
+      };
+  weightLimits?:
+    | T
+    | {
+        min?: T;
+        max?: T;
+      };
+  dimensionLimits?:
+    | T
+    | {
+        maxLength?: T;
+        maxWidth?: T;
+        maxHeight?: T;
+      };
+  trackingEnabled?: T;
+  requiresSignature?: T;
+  insuranceIncluded?: T;
+  sortOrder?: T;
+  icon?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reviews_select".
+ */
+export interface ReviewsSelect<T extends boolean = true> {
+  product?: T;
+  customer?: T;
+  order?: T;
+  title?: T;
+  comment?: T;
+  rating?: T;
+  status?: T;
+  isVerifiedPurchase?: T;
+  helpfulVotes?: T;
+  totalVotes?: T;
+  images?:
+    | T
+    | {
+        image?: T;
+        caption?: T;
+        id?: T;
+      };
+  pros?:
+    | T
+    | {
+        pro?: T;
+        id?: T;
+      };
+  cons?:
+    | T
+    | {
+        con?: T;
+        id?: T;
+      };
+  wouldRecommend?: T;
+  customerInfo?:
+    | T
+    | {
+        displayName?: T;
+        location?: T;
+        isAnonymous?: T;
+      };
+  moderationNotes?: T;
+  response?:
+    | T
+    | {
+        content?: T;
+        respondedBy?: T;
+        respondedAt?: T;
+      };
+  reportedCount?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "coupons_select".
+ */
+export interface CouponsSelect<T extends boolean = true> {
+  code?: T;
+  name?: T;
+  description?: T;
+  type?: T;
+  value?: T;
+  minimumOrderAmount?: T;
+  maximumDiscountAmount?: T;
+  isActive?: T;
+  validFrom?: T;
+  validUntil?: T;
+  usageLimit?:
+    | T
+    | {
+        total?: T;
+        perCustomer?: T;
+      };
+  usageCount?: T;
+  applicableProducts?: T;
+  applicableCategories?: T;
+  excludedProducts?: T;
+  excludedCategories?: T;
+  customerRestrictions?:
+    | T
+    | {
+        firstTimeCustomersOnly?: T;
+        specificCustomers?: T;
+        customerGroups?:
+          | T
+          | {
+              group?: T;
+              id?: T;
+            };
+      };
+  bxgySettings?:
+    | T
+    | {
+        buyQuantity?: T;
+        getQuantity?: T;
+        getProducts?: T;
+      };
+  stackable?: T;
+  autoApply?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
