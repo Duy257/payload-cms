@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  payload:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URI=mongodb://mongo:27017/payload-ecommerce
+      - PAYLOAD_SECRET=${PAYLOAD_SECRET:-your-secret-key-change-in-production}
+      - NEXT_TELEMETRY_DISABLED=1
+    depends_on:
+      - mongo
+    restart: unless-stopped
+    networks:
+      - payload-network
+
+  mongo:
+    image: mongo:7.0
+    ports:
+      - '27017:27017'
+    environment:
+      - MONGO_INITDB_DATABASE=payload-ecommerce
+    volumes:
+      - mongo_data:/data/db
+    command: --storageEngine=wiredTiger
+    restart: unless-stopped
+    networks:
+      - payload-network
+
+volumes:
+  mongo_data:
+
+networks:
+  payload-network:
+    driver: bridge
